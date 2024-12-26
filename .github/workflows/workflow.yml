@@ -201,7 +201,7 @@ jobs:
         run: __tests__/verify-dotnet.ps1 2.2 3.1
 
   test-proxy:
-    runs-on: ubuntu-20
+    runs-on: ubuntu-22.04
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
