@@ -201,7 +201,7 @@ jobs:
         run: __tests__/verify-dotnet.ps1 2.2 3.1
 
   test-proxy:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
@@ -223,7 +223,7 @@ jobs:
       - name: Install curl
         run: |
           apt update
-          apt -y install curl libssl1.1 libssl-dev
+          apt -y install curl  libssl-dev
       - name: Setup dotnet 3.1.201
         uses: ./
         with:
