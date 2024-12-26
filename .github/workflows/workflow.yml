@@ -26,6 +26,16 @@ jobs:
       with:
         node-version: 16.x
         cache: npm
+    - name: Install dependencies on Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install curl libssl-dev
+      shell: bash
+      env:
+        https_proxy: http://squid-proxy:3128
+        http_proxy: http://squid-proxy:3128
+        DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
     - run: npm ci --ignore-scripts
     - run: npm run build
     - run: npm run format-check
