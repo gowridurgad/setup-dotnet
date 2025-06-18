@@ -652,14 +652,14 @@ jobs:
         shell: pwsh
         run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
 
-      - name: Setup dotnet 6.0.401, 8.0.402, 7.0.100-rc.1.22431.12
+      - name: Setup dotnet 8.0.402, 6.0.401, 7.0.100-rc.1.22431.12
         uses: ./
         id: step2
         with:
           dotnet-version: |
-            7.0.100-rc.1.22431.12
-            6.0.401
             8.0.402
+            6.0.401
+            7.0.100-rc.1.22431.12
 
       - name: Verify value of the dotnet-version output
         shell: pwsh
