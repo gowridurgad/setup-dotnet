@@ -664,7 +664,7 @@ jobs:
       - name: Verify value of the dotnet-version output
         shell: pwsh
         run: |
-          $version = "7.0.100-rc.1.22431.12"
+          $version = "8.0.402"
           if (-not ($version -eq '${{steps.step2.outputs.dotnet-version}}')) { throw "Unexpected output value" }
 
   test-proxy:
