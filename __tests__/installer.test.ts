@@ -5,6 +5,7 @@ import fspromises from 'fs/promises';
 import * as exec from '@actions/exec';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
+import * as hc from '@actions/http-client';
 import * as installer from '../src/installer';
 
 import {IS_WINDOWS} from '../src/utils';
@@ -102,12 +103,7 @@ describe('installer tests', () => {
 
         await dotnetInstaller.installDotnet();
 
-        /**
-         * First time script would be called to
-         * install runtime, here we checking only the
-         * second one that installs actual SDK. i.e. 1
-         */
-        const callIndex = 1;
+        const callIndex = 0;
 
         const scriptArguments = (
           getExecOutputSpy.mock.calls[callIndex][1] as string[]
@@ -192,12 +188,7 @@ describe('installer tests', () => {
 
           await dotnetInstaller.installDotnet();
 
-          /**
-           * First time script would be called to
-           * install runtime, here we checking only the
-           * second one that installs actual SDK. i.e. 1
-           */
-          const callIndex = 1;
+          const callIndex = 0;
 
           const scriptArguments = (
             getExecOutputSpy.mock.calls[callIndex][1] as string[]
@@ -232,12 +223,7 @@ describe('installer tests', () => {
 
           await dotnetInstaller.installDotnet();
 
-          /**
-           * First time script would be called to
-           * install runtime, here we checking only the
-           * second one that installs actual SDK. i.e. 1
-           */
-          const callIndex = 1;
+          const callIndex = 0;
 
           const scriptArguments = (
             getExecOutputSpy.mock.calls[callIndex][1] as string[]
@@ -273,12 +259,7 @@ describe('installer tests', () => {
 
           await dotnetInstaller.installDotnet();
 
-          /**
-           * First time script would be called to
-           * install runtime, here we checking only the
-           * second one that installs actual SDK. i.e. 1
-           */
-          const callIndex = 1;
+          const callIndex = 0;
 
           const scriptArguments = (
             getExecOutputSpy.mock.calls[callIndex][1] as string[]
@@ -311,12 +292,7 @@ describe('installer tests', () => {
 
           await dotnetInstaller.installDotnet();
 
-          /**
-           * First time script would be called to
-           * install runtime, here we checking only the
-           * second one that installs actual SDK. i.e. 1
-           */
-          const callIndex = 1;
+          const callIndex = 0;
 
           const scriptArguments = (
             getExecOutputSpy.mock.calls[callIndex][1] as string[]
@@ -347,6 +323,29 @@ describe('installer tests', () => {
   });
 
   describe('DotnetVersionResolver tests', () => {
+    const getJsonSpy = jest.spyOn(hc.HttpClient.prototype, 'getJson');
+
+    beforeEach(() => {
+      // Mock HTTP client to return fake release data
+      getJsonSpy.mockResolvedValue({
+        statusCode: 200,
+        result: {
+          'releases-index': [
+            {'channel-version': '3.1'},
+            {'channel-version': '5.0'},
+            {'channel-version': '6.0'},
+            {'channel-version': '7.0'},
+            {'channel-version': '8.0'}
+          ]
+        },
+        headers: {}
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
     describe('createDotnetVersion() tests', () => {
       each([
         '3.1',
