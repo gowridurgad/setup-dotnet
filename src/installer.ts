@@ -264,10 +264,11 @@ export class DotnetCoreInstaller {
     const versionResolver = new DotnetVersionResolver(this.version);
     const dotnetVersion = await versionResolver.createDotnetVersion();
 
-    const installScript = new DotnetInstallScript().useVersion(
-      dotnetVersion,
-      this.quality
-    );
+    const installScript = new DotnetInstallScript()
+      .useArguments(
+        IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files'
+      )
+      .useVersion(dotnetVersion, this.quality);
 
     const {exitCode, stderr, stdout} = await installScript.execute();
 
