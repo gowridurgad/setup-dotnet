@@ -100682,39 +100682,14 @@ class DotnetCoreInstaller {
     async installDotnet() {
         const versionResolver = new DotnetVersionResolver(this.version);
         const dotnetVersion = await versionResolver.createDotnetVersion();
-        /**
-         * Install dotnet runitme first in order to get
-         * the latest stable version of dotnet CLI
-         */
-        const runtimeInstallOutput = await new DotnetInstallScript()
-            // If dotnet CLI is already installed - avoid overwriting it
+        const installScript = new DotnetInstallScript()
             .useArguments(utils_1.IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files')
-            // Install only runtime + CLI
-            .useArguments(utils_1.IS_WINDOWS ? '-Runtime' : '--runtime', 'dotnet')
-            // Use latest stable version
-            .useArguments(utils_1.IS_WINDOWS ? '-Channel' : '--channel', 'LTS')
-            .execute();
-        if (runtimeInstallOutput.exitCode) {
-            /**
-             * dotnetInstallScript will install CLI and runtime even if previous script haven't succeded,
-             * so at this point it's too early to throw an error
-             */
-            core.warning(`Failed to install dotnet runtime + cli, exit code: ${runtimeInstallOutput.exitCode}. ${runtimeInstallOutput.stderr}`);
+            .useVersion(dotnetVersion, this.quality);
+        const { exitCode, stderr, stdout } = await installScript.execute();
+        if (exitCode) {
+            throw new Error(`Failed to install dotnet, exit code: ${exitCode}. ${stderr}`);
         }
-        /**
-         * Install dotnet over the latest version of
-         * dotnet CLI
-         */
-        const dotnetInstallOutput = await new DotnetInstallScript()
-            // Don't overwrite CLI because it should be already installed
-            .useArguments(utils_1.IS_WINDOWS ? '-SkipNonVersionedFiles' : '--skip-non-versioned-files')
-            // Use version provided by user
-            .useVersion(dotnetVersion, this.quality)
-            .execute();
-        if (dotnetInstallOutput.exitCode) {
-            throw new Error(`Failed to install dotnet, exit code: ${dotnetInstallOutput.exitCode}. ${dotnetInstallOutput.stderr}`);
-        }
-        return this.parseInstalledVersion(dotnetInstallOutput.stdout);
+        return this.parseInstalledVersion(stdout);
     }
     parseInstalledVersion(stdout) {
         const regex = /(?<version>\d+\.\d+\.\d+[a-z0-9._-]*)/gm;
