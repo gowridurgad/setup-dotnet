@@ -100784,6 +100784,7 @@ const cache_utils_1 = __nccwpck_require__(1678);
 const cache_restore_1 = __nccwpck_require__(9517);
 const constants_1 = __nccwpck_require__(9042);
 const json5_1 = __importDefault(__nccwpck_require__(6904));
+const exec = __importStar(__nccwpck_require__(1514));
 const qualityOptions = [
     'daily',
     'signed',
@@ -100836,6 +100837,26 @@ async function run() {
                 installedDotnetVersions.push(installedVersion);
             }
             installer_1.DotnetInstallDir.addToPath();
+            // ----------- Workloads install logic START -------------
+            const workloadsRaw = core.getInput('workloads');
+            if (workloadsRaw) {
+                // Accepts YAML array: workloads: [maui, aspire]
+                // Accepts CSV: maui, aspire
+                // Accepts space separated: maui aspire
+                // Remove brackets/quotes, split by comma or space
+                const workloads = workloadsRaw
+                    .replace(/[[\]"']/g, '') // Remove brackets/quotes
+                    .split(/[,\s]+/) // Split by comma or whitespace
+                    .map(w => w.trim())
+                    .filter(Boolean); // Remove empty
+                if (workloads.length) {
+                    // Always update manifests before installing workloads
+                    await exec.exec('dotnet', ['workload', 'update']);
+                    // Install all specified workloads in bulk
+                    await exec.exec('dotnet', ['workload', 'install', ...workloads]);
+                }
+            }
+            // ----------- Workloads install logic END -------------
         }
         const sourceUrl = core.getInput('source-url');
         const configFile = core.getInput('config-file');

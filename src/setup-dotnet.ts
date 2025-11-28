@@ -8,6 +8,7 @@ import {isCacheFeatureAvailable} from './cache-utils';
 import {restoreCache} from './cache-restore';
 import {Outputs} from './constants';
 import JSON5 from 'json5';
+import * as exec from '@actions/exec';
 
 const qualityOptions = [
   'daily',
@@ -74,6 +75,28 @@ export async function run() {
         installedDotnetVersions.push(installedVersion);
       }
       DotnetInstallDir.addToPath();
+
+      // ----------- Workloads install logic START -------------
+      const workloadsRaw = core.getInput('workloads');
+      if (workloadsRaw) {
+        // Accepts YAML array: workloads: [maui, aspire]
+        // Accepts CSV: maui, aspire
+        // Accepts space separated: maui aspire
+        // Remove brackets/quotes, split by comma or space
+        const workloads = workloadsRaw
+          .replace(/[[\]"']/g, '') // Remove brackets/quotes
+          .split(/[,\s]+/) // Split by comma or whitespace
+          .map(w => w.trim())
+          .filter(Boolean); // Remove empty
+
+        if (workloads.length) {
+          // Always update manifests before installing workloads
+          await exec.exec('dotnet', ['workload', 'update']);
+          // Install all specified workloads in bulk
+          await exec.exec('dotnet', ['workload', 'install', ...workloads]);
+        }
+      }
+      // ----------- Workloads install logic END -------------
     }
 
     const sourceUrl: string = core.getInput('source-url');
