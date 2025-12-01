@@ -24,6 +24,11 @@ inputs:
   cache-dependency-path:
     description: 'Used to specify the path to a dependency file: packages.lock.json. Supports wildcards or a list of file names for caching multiple dependencies.'
     required: false
+  workloads:
+    description: 'Optional list of .NET workloads to install (for example [maui, aspire] or "maui,aspire"). Workloads are installed after the SDK is set up.'
+    required: false
+  # Note: this action currently supports direct bulk installation of workloads via the
+  # `workloads` input. Workload restore / versioned workload-sets are not implemented here.
 outputs:
   cache-hit:
     description: 'A boolean value to indicate if a cache was hit.'

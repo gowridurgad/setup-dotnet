@@ -8,6 +8,7 @@ import {isCacheFeatureAvailable} from './cache-utils';
 import {restoreCache} from './cache-restore';
 import {Outputs} from './constants';
 import JSON5 from 'json5';
+import * as exec from '@actions/exec';
 
 const qualityOptions = [
   'daily',
@@ -74,6 +75,30 @@ export async function run() {
         installedDotnetVersions.push(installedVersion);
       }
       DotnetInstallDir.addToPath();
+
+      // ----------- Workloads handling (direct install only) -------------
+      const workloadsRaw = core.getInput('workloads');
+      if (workloadsRaw) {
+        const workloads = workloadsRaw
+          .replace(/[[\]"']/g, '')
+          .split(/[,\s]+/)
+          .map(w => w.trim())
+          .filter(Boolean);
+
+        if (workloads.length) {
+          try {
+            core.info(`Refreshing workload manifests...`);
+            await exec.exec('dotnet', ['workload', 'update']);
+
+            core.info(`Installing workloads: ${workloads.join(', ')}`);
+            await exec.exec('dotnet', ['workload', 'install', ...workloads]);
+          } catch (err) {
+            throw new Error(
+              `Failed to install workloads [${workloads.join(', ')}]: ${err}`
+            );
+          }
+        }
+      }
     }
 
     const sourceUrl: string = core.getInput('source-url');

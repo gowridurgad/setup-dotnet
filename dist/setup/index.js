@@ -100784,6 +100784,7 @@ const cache_utils_1 = __nccwpck_require__(1678);
 const cache_restore_1 = __nccwpck_require__(9517);
 const constants_1 = __nccwpck_require__(9042);
 const json5_1 = __importDefault(__nccwpck_require__(6904));
+const exec = __importStar(__nccwpck_require__(1514));
 const qualityOptions = [
     'daily',
     'signed',
@@ -100836,6 +100837,26 @@ async function run() {
                 installedDotnetVersions.push(installedVersion);
             }
             installer_1.DotnetInstallDir.addToPath();
+            // ----------- Workloads handling (direct install only) -------------
+            const workloadsRaw = core.getInput('workloads');
+            if (workloadsRaw) {
+                const workloads = workloadsRaw
+                    .replace(/[[\]"']/g, '')
+                    .split(/[,\s]+/)
+                    .map(w => w.trim())
+                    .filter(Boolean);
+                if (workloads.length) {
+                    try {
+                        core.info(`Refreshing workload manifests...`);
+                        await exec.exec('dotnet', ['workload', 'update']);
+                        core.info(`Installing workloads: ${workloads.join(', ')}`);
+                        await exec.exec('dotnet', ['workload', 'install', ...workloads]);
+                    }
+                    catch (err) {
+                        throw new Error(`Failed to install workloads [${workloads.join(', ')}]: ${err}`);
+                    }
+                }
+            }
         }
         const sourceUrl = core.getInput('source-url');
         const configFile = core.getInput('config-file');
