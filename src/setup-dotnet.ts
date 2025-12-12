@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as exec from '@actions/exec';
 import {DotnetCoreInstaller, DotnetInstallDir} from './installer';
 import * as fs from 'fs';
 import path from 'path';
@@ -74,6 +75,29 @@ export async function run() {
         installedDotnetVersions.push(installedVersion);
       }
       DotnetInstallDir.addToPath();
+
+      const workloadsRaw = core.getInput('workloads');
+      if (workloadsRaw) {
+        const workloads = workloadsRaw
+          .replace(/['"]/g, '')
+          .split(/[\n,\s]+/)
+          .map(w => w.trim())
+          .filter(Boolean);
+
+        if (workloads.length) {
+          try {
+            core.info(`Refreshing workload manifests...`);
+            await exec.exec('dotnet', ['workload', 'update']);
+
+            core.info(`Installing workloads: ${workloads.join(', ')}`);
+            await exec.exec('dotnet', ['workload', 'install', ...workloads]);
+          } catch (err) {
+            throw new Error(
+              `Failed to install workloads [${workloads.join(', ')}]: ${err}`
+            );
+          }
+        }
+      }
     }
 
     const sourceUrl: string = core.getInput('source-url');
