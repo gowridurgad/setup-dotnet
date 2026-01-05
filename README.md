@@ -230,8 +230,8 @@ steps:
 ```
 > **Note**: It's the only way to push a package to nuget.org feed for macOS/Linux machines due to API key config store limitations.
 
-## Using the `workloads` and `workload-update` inputs
-The `workloads` input allows you to install .NET workloads as part of the SDK setup. Workloads provide additional platform tools and dependencies for frameworks. By default, the action installs only the explicitly requested workloads without updating existing ones. Set `workload-update: true` to run `dotnet workload update` before installation, which updates all installed workload manifests but may increase installation time.
+## Using the `workloads` inputs
+The `workloads` input allows you to install .NET workloads as part of the SDK setup. Workloads provide additional platform tools and dependencies for frameworks. This action automatically runs `dotnet workload update` before installing the specified workloads to ensure manifests are refreshed and existing workloads are updated to their latest compatible versions.
 
 ```yaml
 steps:
@@ -240,8 +240,7 @@ steps:
   uses: actions/setup-dotnet@v5
   with:
     dotnet-version: '9.0.x'
-    workloads: maui-android, maui-ios
-    workload-update: false  # Optional: set to true to update workload manifests before installation
+    workloads: workload1, workload2
 - run: dotnet build <my project>
 ```
 

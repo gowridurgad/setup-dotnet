@@ -27,10 +27,6 @@ inputs:
   workloads:
     description: 'Optional SDK workloads to install for additional platform support.'
     required: false
-  workload-update:
-    description: 'Optional boolean to run dotnet workload update before installing workloads.'
-    required: false
-    default: 'false'
 outputs:
   cache-hit:
     description: 'A boolean value to indicate if a cache was hit.'
