@@ -823,14 +823,22 @@ jobs:
         shell: pwsh
         run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
 
-      - name: Setup dotnet 10.0 with preview quality
+      - name: Setup dotnet 9.0 with workloads
         uses: ./
+        id: setup-dotnet
         with:
-          dotnet-version: '10.0'
+          dotnet-version: '9.0'
           workloads: wasm-tools
+      - name: Verify workload
+        shell: pwsh
+        run: |
+          $workloads = dotnet workload list
+          if ($workloads -notmatch "wasm-tools") {
+            throw "Expected workload 'wasm-tools' not found"
+          }
       - name: Verify dotnet
         shell: pwsh
-        run: __tests__/verify-dotnet.ps1 -Patterns "^10\.0\.\d+-"
+        run: __tests__/verify-dotnet.ps1 -Patterns "^9\.0"
 
   test-setup-with-workloads-update:
     runs-on: ${{ matrix.operating-system }}
@@ -846,12 +854,20 @@ jobs:
         shell: pwsh
         run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
 
-      - name: Setup dotnet 10.0 with preview quality
+      - name: Setup dotnet 9.0 with workloads and update
         uses: ./
+        id: setup-dotnet
         with:
-          dotnet-version: '10.0'
+          dotnet-version: '9.0'
           workloads: wasm-tools
           workload-update: true
+      - name: Verify workload
+        shell: pwsh
+        run: |
+          $workloads = dotnet workload list
+          if ($workloads -notmatch "wasm-tools") {
+            throw "Expected workload 'wasm-tools' not found"
+          }
       - name: Verify dotnet
         shell: pwsh
-        run: __tests__/verify-dotnet.ps1 -Patterns "^10\.0\.\d+-"
+        run: __tests__/verify-dotnet.ps1 -Patterns "^9\.0"
