@@ -832,8 +832,10 @@ jobs:
       - name: Verify workload
         shell: pwsh
         run: |
-          $workloads = dotnet workload list
-          if ($workloads -notmatch "wasm-tools") {
+          $output = dotnet workload list | Out-String
+          Write-Host "Workload list output:"
+          Write-Host $output
+          if ($output -notmatch "wasm-tools") {
             throw "Expected workload 'wasm-tools' not found"
           }
       - name: Verify dotnet
@@ -864,8 +866,10 @@ jobs:
       - name: Verify workload
         shell: pwsh
         run: |
-          $workloads = dotnet workload list
-          if ($workloads -notmatch "wasm-tools") {
+          $output = dotnet workload list | Out-String
+          Write-Host "Workload list output:"
+          Write-Host $output
+          if ($output -notmatch "wasm-tools") {
             throw "Expected workload 'wasm-tools' not found"
           }
       - name: Verify dotnet
