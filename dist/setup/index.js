@@ -100845,8 +100845,11 @@ async function run() {
                     .filter(Boolean);
                 if (workloads.length) {
                     try {
-                        core.info(`Refreshing workload manifests...`);
-                        await exec.exec('dotnet', ['workload', 'update']);
+                        const workloadUpdate = core.getBooleanInput('workload-update');
+                        if (workloadUpdate) {
+                            core.info(`Refreshing workload manifests...`);
+                            await exec.exec('dotnet', ['workload', 'update']);
+                        }
                         core.info(`Installing workloads: ${workloads.join(', ')}`);
                         await exec.exec('dotnet', ['workload', 'install', ...workloads]);
                     }

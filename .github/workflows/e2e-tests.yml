@@ -808,3 +808,50 @@ jobs:
       - name: Verify dotnet (higher version)
         shell: pwsh
         run: __tests__/verify-dotnet.ps1 -Patterns "^${{ matrix.lower-version }}$", "^${{ matrix.higher-version }}$"
+
+  test-setup-with-workloads-input:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system:
+          [ubuntu-latest, windows-latest, macos-15-intel, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Clear toolcache
+        shell: pwsh
+        run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
+
+      - name: Setup dotnet 10.0 with preview quality
+        uses: ./
+        with:
+          dotnet-version: '10.0'
+          workloads: wasm-tools
+      - name: Verify dotnet
+        shell: pwsh
+        run: __tests__/verify-dotnet.ps1 -Patterns "^10\.0\.\d+-"
+
+  test-setup-with-workloads-update:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system:
+          [ubuntu-latest, windows-latest, macos-15-intel, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Clear toolcache
+        shell: pwsh
+        run: __tests__/clear-toolcache.ps1 ${{ runner.os }}
+
+      - name: Setup dotnet 10.0 with preview quality
+        uses: ./
+        with:
+          dotnet-version: '10.0'
+          workloads: wasm-tools
+          workload-update: true
+      - name: Verify dotnet
+        shell: pwsh
+        run: __tests__/verify-dotnet.ps1 -Patterns "^10\.0\.\d+-"
