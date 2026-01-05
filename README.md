@@ -240,7 +240,7 @@ steps:
   uses: actions/setup-dotnet@v5
   with:
     dotnet-version: '9.0.x'
-    workloads: workload1 workload2
+    workloads: workload1, workload2
 - run: dotnet build <my project>
 ```
 > **Note**: Ensure workloads are compatible with your runner's OS, architecture, and .NET SDK version before enabling workload installation. Some workloads may require additional installation time due to large toolchain downloads.

@@ -76,11 +76,10 @@ export async function run() {
       }
       DotnetInstallDir.addToPath();
 
-      const workloadsRaw = core.getInput('workloads');
-      if (workloadsRaw) {
-        const workloads = workloadsRaw
-          .replace(/['"]/g, '')
-          .split(/[\n,\s]+/)
+      const workloadsInput = core.getInput('workloads');
+      if (workloadsInput) {
+        const workloads = workloadsInput
+          .split(',')
           .map(w => w.trim())
           .filter(Boolean);
 
