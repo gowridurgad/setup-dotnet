@@ -91,8 +91,14 @@ export async function run() {
             core.info(`Installing workloads: ${workloads.join(', ')}`);
             await exec.exec('dotnet', ['workload', 'install', ...workloads]);
           } catch (err) {
+            if (err instanceof Error) {
+              err.message = `Failed to install workloads [${workloads.join(', ')}]: ${err.message}`;
+              throw err;
+            }
             throw new Error(
-              `Failed to install workloads [${workloads.join(', ')}]: ${err}`
+              `Failed to install workloads [${workloads.join(', ')}]: ${String(
+                err
+              )}`
             );
           }
         }
