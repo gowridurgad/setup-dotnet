@@ -100775,6 +100775,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
+const exec = __importStar(__nccwpck_require__(1514));
 const installer_1 = __nccwpck_require__(2574);
 const fs = __importStar(__nccwpck_require__(7147));
 const path_1 = __importDefault(__nccwpck_require__(1017));
@@ -100836,6 +100837,32 @@ async function run() {
                 installedDotnetVersions.push(installedVersion);
             }
             installer_1.DotnetInstallDir.addToPath();
+            const workloadsInput = core.getInput('workloads');
+            if (workloadsInput) {
+                const workloads = workloadsInput
+                    .split(',')
+                    .map(w => w.trim())
+                    .filter(Boolean);
+                if (workloads.length) {
+                    try {
+                        core.info(`Refreshing workload manifests...`);
+                        const updateResult = await exec.getExecOutput('dotnet', ['workload', 'update'], { ignoreReturnCode: true });
+                        if (updateResult.exitCode !== 0) {
+                            throw new Error(`Failed to update workload manifests: ${updateResult.stderr || updateResult.stdout}`);
+                        }
+                        core.info(`Installing workloads: ${workloads.join(', ')}`);
+                        const installResult = await exec.getExecOutput('dotnet', ['workload', 'install', ...workloads], { ignoreReturnCode: true });
+                        if (installResult.exitCode !== 0) {
+                            throw new Error(`Failed to install workloads: ${installResult.stderr || installResult.stdout}`);
+                        }
+                        core.info('Workloads installed successfully');
+                    }
+                    catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : String(error);
+                        throw new Error(`Error installing workloads: ${errorMessage}`);
+                    }
+                }
+            }
         }
         const sourceUrl = core.getInput('source-url');
         const configFile = core.getInput('config-file');
