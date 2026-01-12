@@ -100846,16 +100846,20 @@ async function run() {
                 if (workloads.length) {
                     try {
                         core.info(`Refreshing workload manifests...`);
-                        await exec.exec('dotnet', ['workload', 'update']);
-                        core.info(`Installing workloads: ${workloads.join(', ')}`);
-                        await exec.exec('dotnet', ['workload', 'install', ...workloads]);
-                    }
-                    catch (err) {
-                        if (err instanceof Error) {
-                            err.message = `Failed to install workloads [${workloads.join(', ')}]: ${err.message}`;
-                            throw err;
+                        const updateResult = await exec.getExecOutput('dotnet', ['workload', 'update'], { ignoreReturnCode: true });
+                        if (updateResult.exitCode !== 0) {
+                            throw new Error(`Failed to update workload manifests: ${updateResult.stderr || updateResult.stdout}`);
                         }
-                        throw new Error(`Failed to install workloads [${workloads.join(', ')}]: ${String(err)}`);
+                        core.info(`Installing workloads: ${workloads.join(', ')}`);
+                        const installResult = await exec.getExecOutput('dotnet', ['workload', 'install', ...workloads], { ignoreReturnCode: true });
+                        if (installResult.exitCode !== 0) {
+                            throw new Error(`Failed to install workloads: ${installResult.stderr || installResult.stdout}`);
+                        }
+                        core.info('Workloads installed successfully');
+                    }
+                    catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : String(error);
+                        throw new Error(`Error installing workloads: ${errorMessage}`);
                     }
                 }
             }
